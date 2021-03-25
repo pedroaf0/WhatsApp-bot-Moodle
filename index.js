@@ -1,11 +1,12 @@
 const venom = require('venom-bot');
+require('dotenv').config();
 
 const request = require("request");
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 const baseurl = 'https://moodle.sertao.ifrs.edu.br';
-const username = 'moodle user';
-const password = 'moodle pass';
+const username = process.env.MOODLEUSER;
+const password = process.env.MOODLEPASS;
 
 const login = (baseurl,username,password)=> new Promise((re,err)=>{
     request(`${baseurl}/login/token.php?username=${username}&password=${password}&service=moodle_mobile_app`, function (error, response, body) {
@@ -41,7 +42,20 @@ async function a(){
   
 
 venom
-  .create()
+  .create(
+    'sessionName',    
+    
+    (base64Qrimg, asciiQR, attempts, urlCode) => {
+    console.log('urlCode (data-ref): ', urlCode);
+  },
+  (statusSession, session) => {
+    console.log('Status Session: ', statusSession); 
+    console.log('Session name: ', session);
+  },{puppeteerOptions: {args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox'
+  ]
+}})
   .then((client) => start(client))
   .catch((erro) => {
     console.log(erro);
@@ -71,3 +85,13 @@ function start(client) {
   });
 }
 }a()
+
+const http = require("http");
+
+var express = require('express');
+var app = express();
+const server = http.createServer(app);
+app.get('/', function(req, res) {
+  res.send('O bot de zap está rodando agora ;)');
+});
+server.listen(process.env.PORT || 3000)
